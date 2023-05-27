@@ -223,12 +223,14 @@ color:#1673c0;
     color:green;
 }
 .preview .info .fa-circle.a6{
-    color:black;
+    color:#7d3e54;
 }
 .preview .info .fa-circle.a7{
     color:pink;
 }
-
+.preview .info .fa-circle.a9{
+    color:orange;
+}
 
 /* style deviceUser */
 .deviceUser {

@@ -164,12 +164,33 @@ else if (perform>=0) {
 
 // Kiểm tra thiết bị người dùng
 checkDevice: function(){
-const Device =  window.navigator.userAgent;
-deviceUser.innerHTML = "Bạn đang dùng thiết bị"+ " "+ Device +" để truy cập vào web của Đức Mạnh"+"</br>"+
-"Dữ liệu thiết bị của bạn không lưu trữ trên server, cảm ơn!";
-deviceUser.style.color = "#333";
-deviceUser.style.fontWeight = "500";
-deviceUser.style.FontSize = "20px";
+function checkOs (){
+    if (navigator.appVersion.indexOf("Win")!=-1) OS="Windows 10/11";
+    if (navigator.appVersion.indexOf("Mac")!=-1) OS="MacOS";
+    if (navigator.appVersion.indexOf("X11")!=-1) OS="UNIX";
+    if (navigator.appVersion.indexOf("Linux")!=-1) OS="Linux";
+    return OS;
+
+};
+function fnBrowserDetect(){
+    let userAgent = navigator.userAgent;
+    if(userAgent.match(/chrome|chromium|crios/i)){
+        browserName = "chrome";
+      }else if(userAgent.match(/firefox|fxios/i)){
+        browserName = "firefox";
+      }  else if(userAgent.match(/safari/i)){
+        browserName = "safari";
+      }else if(userAgent.match(/opr\//i)){
+        browserName = "opera";
+      } else if(userAgent.match(/edg/i)){
+        browserName = "edge";
+      }else{
+        browserName="No browser detection";
+      }
+      return browserName;
+    };
+deviceUser.innerHTML = "Bạn đang sử dụng"+"</br>"+
+"Trình Duyệt:"+ fnBrowserDetect()+"</br>"+"Hệ Điều Hành:"+checkOs();
 },
 // Khởi chạy ứng dụng
 start: function(){
@@ -179,6 +200,8 @@ this.RenderListSong();
 this.HandleEvent();
 this.checkDevice();
 this.SongNext();
+this.checkDevice();
+console.log(window.navigator)
 }
 };
 app.start();

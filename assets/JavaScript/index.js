@@ -141,6 +141,9 @@ Nextbtn.onclick = function(){
 PreBtn.onclick = function(){
 app.SongPre();
 }
+SongAudio.onended = function(){
+    app.SongNext();
+}
 // Khi bài hát đang phát
 
 },
@@ -158,6 +161,7 @@ else if (perform>=0) {
 }
 
 },
+
 // Kiểm tra thiết bị người dùng
 checkDevice: function(){
 const Device =  window.navigator.userAgent;

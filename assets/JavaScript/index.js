@@ -1,6 +1,8 @@
 const $ = document.querySelector.bind(document);
 const $$ = document.querySelectorAll.bind(document);
 const deviceUser = $('.deviceUser');
+const OSbrowser = (".OSbrowser");
+const OSlapdesk = (".OSlapdesk");
 const ListSong = $(".Song_List");
 const SongPlaying = $('.Song_playing');
 const Playbtn = $(".play");
@@ -68,27 +70,44 @@ const app = {
     <div class="Song_wrapper">
     <div class="Song_Name">${song.name}</div>
     <div class="song_Author">${song.singer}</div>
-    <button class="PlaySong">Phát</button>
+    <button class="PlaySong" data-index ="${index}">Phát</button>
 </div>
     `
         })
         ListSong.innerHTML = SongList.join();
         const PLaySong = $$(".PlaySong");
         PLaySong.forEach((btn, index) => {
-            // khi click play 
+            // khi click play
             btn.onclick = function () {
                 app.currentIndex = index;
                 app.GetcurrentSong(index);
                 app.LoadingCurrrentSong(index);
                 app.SongPlay();
                 app.GettimeSong();
-                return app.currentIndex;
-
-
+                // khi click Next sau khi ấn play;
                 Nextbtn.onclick = function () {
-
+                    index++;
+                    if (index > app.Songs.length - 1) {
+                        index = 0;
+                    }
+                    app.GetcurrentSong(index);
+                    app.LoadingCurrrentSong(index);
+                    app.SongPlay();
                 }
-
+                // Khi click Pre sau khi ấn play;
+                PreBtn.onclick = function () {
+                    index--;
+                    if (index < 0) {
+                        index = app.Songs.length - 1;
+                    }
+                    app.GetcurrentSong(index);
+                    app.LoadingCurrrentSong(index);
+                    app.SongPlay();
+                }
+                // Tự động chuyển bài sau khi audio kết thúc sau khi ấn play;
+                Audio.onended = function () {
+                    Nextbtn.click();
+                }
             }
 
         })
@@ -117,10 +136,10 @@ const app = {
         SongAudio.pause();
     },
     // Chuyển bài kế tiếp
-    SongNext: function (indexSong) {
-        var newIndex = indexSong++;
-        if (indexSong > app.Songs.length - 1) {
-            indexSong = 0;
+    SongNext: function () {
+        var newIndex = this.currentIndex++;
+        if (newIndex > app.Songs.length - 1) {
+            this.currentIndex = 0;
         }
         app.GetcurrentSong(newIndex);
         app.LoadingCurrrentSong(newIndex);
@@ -130,14 +149,17 @@ const app = {
     },
 
     SongPre: function () {
-        var newIndex = index--;
-        if (index < 0) {
-            index = app.Songs.length - 1;
+        var newIndex = this.currentIndex--;
+        if (newIndex < 0) {
+            this.currentIndex = app.Songs.length;
         }
         app.GetcurrentSong(newIndex);
         app.LoadingCurrrentSong(newIndex);
         app.SongPlay();
         app.GettimeSong()
+    },
+    SongActive: function (index) {
+
     },
 
     // Sự kiện ấn các phím Phát,Dừng,Tiến,Lùi
@@ -152,7 +174,9 @@ const app = {
             app.SongPause();
         };
         // ấn nút next 
-
+        Nextbtn.onclick = function () {
+            app.SongNext();
+        }
 
         // ấn nút pre 
         PreBtn.onclick = function () {
@@ -186,7 +210,6 @@ const app = {
             ProfileWrapper.style.backgroundColor = "black";
             ProfileWrapper.style.color = "white";
             previewInfo.style.color = "white";
-
         }
         Lightbtn.onclick = function () {
             ProfileWrapper.style.backgroundColor = "white";
@@ -194,45 +217,71 @@ const app = {
             previewInfo.style.color = "#333";
 
         }
+
+        Darkbtn.addEventListener("click", () => {
+            Darkbtn.style.display = "none";
+            Lightbtn.style.display = "flex";
+        })
+        Lightbtn.addEventListener("click", () => {
+            Lightbtn.style.display = "none";
+            Darkbtn.style.display = "flex";
+        })
     },
 
     // Kiểm tra thiết bị người dùng
-    checkDevice: function () {
-        function checkOs() {
-            if (navigator.appVersion.indexOf("Win") != -1) OS = "Windows 10/11";
-            if (navigator.appVersion.indexOf("Mac") != -1) OS = "MacOS";
-            if (navigator.appVersion.indexOf("X11") != -1) OS = "UNIX";
-            if (navigator.appVersion.indexOf("Linux") != -1) OS = "Linux";
-            return OS;
+    checkDevices: function () {
+        const Info = new MobileDetect(window.navigator.userAgent);
+        const checkOS = window.navigator.userAgent;
+        const checkOSData = window.navigator.userAgentData;
+        const OSother = checkOSData.platform;
+        const Windows = checkOS.match("Windows NT");
+        const Android = checkOS.match("Android");
+        const Mac = checkOS.match("Mac");
+        const phone = Info.phone();
+        const mobile = Info.mobile();
+        const tablet = !Info.tablet();
+        const Lap_Desk = !phone || !mobile || !tablet;
+        const InfoNative = window.navigator.userAgentData;
+        const Browser = InfoNative.brands[0].brand;
+        const versionBrowser = InfoNative.brands[0].version;
+        const checkDevice = () => {
 
-        };
-        function fnBrowserDetect() {
-            let userAgent = navigator.userAgent;
-            if (userAgent.match(/chrome|chromium|crios/i)) {
-                browserName = "chrome";
-            } else if (userAgent.match(/firefox|fxios/i)) {
-                browserName = "firefox";
-            } else if (userAgent.match(/safari/i)) {
-                browserName = "safari";
-            } else if (userAgent.match(/opr\//i)) {
-                browserName = "opera";
-            } else if (userAgent.match(/edg/i)) {
-                browserName = "edge";
-            } else {
-                browserName = "No browser detection";
+            if (!phone || !mobile || !tablet) {
+                if (Windows[0]) {
+                    deviceUser.innerHTML = "bạn đang dùng hệ điều hành:"
+                        + Windows[0] + "<br>"
+                        + "Trình duyệt:" + Browser + "<br>"
+                        + "Phiên bản trình duyệt:" + versionBrowser;
+
+                }
+                else if (Mac[0]) {
+                    deviceUser.innerHTML = "bạn đang dùng" + Mac[0] +
+                        "<br>"
+                        + "Trình duyệt:" + Browser + "<br>"
+                        + "Phiên bản trình duyệt:" + versionBrowser;
+                }
             }
-            return browserName;
-        };
-        deviceUser.innerHTML = "Bạn đang sử dụng" + "</br>" +
-            "Trình Duyệt:" + fnBrowserDetect() + "</br>" + "Hệ Điều Hành:" + checkOs();
+            else {
+
+                deviceUser.innerHTML = "bạn đang dùng" + " " + OSother +
+                    "<br>"
+                    + "Trình duyệt:" + Browser + "<br>"
+                    + "Phiên bản trình duyệt:" + versionBrowser;
+
+
+            }
+        }
+
+        // chay ham
+        checkDevice();
     },
     // Khởi chạy ứng dụng
     start: function () {
         app.GetcurrentSong(index);
         app.LoadingCurrrentSong(index);
         app.RenderListSong();
-        this.HandleEvent();
-        this.checkDevice();
+        app.HandleEvent();
+        app.checkDevices();
         app.HandleUI();
     }
 };
